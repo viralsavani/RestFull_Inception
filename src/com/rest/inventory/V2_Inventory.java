@@ -61,6 +61,33 @@ public class V2_Inventory {
         return Response.ok(returnString).build();
     }
 
+    /*
+    * First param defines your scope .Each subsequent @PathParam should refine you scope.
+    * That means first @PathParam is "brand" which gives an long list of brand products.
+    * After that we refine result to get an "item code"
+    * */
+
+     @Path("/{brand}/{item_code}")
+    @GET
+    @Produces(MediaType.APPLICATION_JSON)
+    public Response returnSpecificBrandItem(@PathParam("brand") String brand,
+                                            @PathParam("item_code") String item_code) throws Exception{
+        String returnString;
+        JSONArray jsonArray;
+
+        try{
+            Schema newSchema = new Schema();
+            jsonArray = newSchema.queryToReturnBrandItemNumber(brand,item_code);
+            returnString = jsonArray.toString();
+
+        }catch (Exception e){
+            e.printStackTrace();
+            return Response.status(500).entity("Server was not able to fulfill your request").build();
+        }
+
+        return Response.ok(returnString).build();
+    }
+
     public static void main(String[] args) throws IOException {
         HttpServer server = HttpServerFactory.create("http://localhost:9998/");
         server.start();

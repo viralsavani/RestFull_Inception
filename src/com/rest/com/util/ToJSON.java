@@ -2,7 +2,7 @@ package com.rest.com.util;
 
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
-
+import org.owasp.esapi.ESAPI;
 import java.sql.ResultSet;
 import java.sql.Types;
 
@@ -18,13 +18,13 @@ public class ToJSON {
     public JSONArray toJSONArray (ResultSet rs){
 
         JSONArray jsonArray = new JSONArray();
+        String temp = null;
 
         try{
             java.sql.ResultSetMetaData setMetaData = rs.getMetaData();
 
             while (rs.next()){
                 int numCols = setMetaData.getColumnCount();
-                System.out.println(">>>>>>>"+numCols);
                 JSONObject  jsonObject = new JSONObject();
 
                 for(int i = 1; i < numCols+1; i++){
@@ -59,8 +59,16 @@ public class ToJSON {
                         System.out.println("ToJSON : INTEGER");
                     }
                     else if(setMetaData.getColumnType(i) == Types.VARCHAR){
-                        jsonObject.put(column_name, rs.getString(column_name));
-                        System.out.println("ToJSON : VARCHAR");
+
+                        temp = rs.getString(column_name);
+
+                        // Convert every form to its base version "De-encoded" to its base state
+                        temp = ESAPI.encoder().canonicalize(temp);
+                        temp = ESAPI.encoder().encodeForHTML(temp);
+                        jsonObject.put(column_name, temp);
+
+//                        jsonObject.put(column_name, rs.getString(column_name));
+//                        System.out.println("ToJSON : VARCHAR");
                     }
                     else if(setMetaData.getColumnType(i) == Types.TINYINT){
                         jsonObject.put(column_name, rs.getInt(column_name));
